@@ -1,4 +1,6 @@
 import Booking from "../models/Booking.js";
+import Schedule from "../models/Schedule.js";
+
 import {
   successResponse,
   createdResponse,
@@ -9,6 +11,18 @@ import {
 
 export const createBooking = async (req, res) => {
   try {
+    const { service_schedule_id } = req.body;
+
+    if (service_schedule_id) {
+      const schedule = await Schedule.findById(service_schedule_id);
+      if (!schedule) {
+        return notFoundResponse(res, `Schedule with ID ${service_schedule_id} not found`);
+      }
+
+      if (schedule.quota <= 0) {
+        return conflictResponse(res, "No available quota for this schedule");
+      }
+    }
     const bookingId = await Booking.create(req.body);
     const newBooking = await Booking.findById(bookingId);
 
