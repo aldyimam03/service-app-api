@@ -91,13 +91,13 @@ const startServer = async () => {
       );
       console.log("   POST /api/bookings               - Create booking");
       console.log(
-        "   GET  /api/bookings/check         - Check bookings by phone"
+        "   GET  /api/bookings/:phone         - Check bookings by phone"
       );
       console.log(
         "   GET  /api/bookings/statistics    - Get booking statistics (protected)"
       );
       console.log(
-        "   GET  /api/bookings/status/:status- Get bookings by status (protected)"
+        "   GET  /api/bookings/status/:statusId- Get bookings by status (protected)"
       );
       console.log(
         "   GET  /api/bookings/:id           - Get booking by ID (protected)"
