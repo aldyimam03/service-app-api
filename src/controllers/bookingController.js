@@ -90,6 +90,11 @@ export const updateBookingStatus = async (req, res) => {
       return badRequestResponse(res, "service_status_id is required");
     }
 
+     const statusId = parseInt(service_status_id);
+    if (isNaN(statusId) || statusId < 1 || statusId > 5) {
+      return badRequestResponse(res, "Invalid status ID");
+    }
+
     const booking = await Booking.findById(id);
     if (!booking) {
       return notFoundResponse(res, "Booking not found");
