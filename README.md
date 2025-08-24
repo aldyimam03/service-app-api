@@ -101,6 +101,12 @@ Jalankan server untuk test koneksi database:
 npm run dev
 ```
 
+### 6. Use Seeder (Optional but recommended)
+Jika tidak menggunakan seeder maka data harus sibuat secara manual untuk tes fitur, namun jika ingin menggunakan seeder :
+```bash
+npm run seed
+```
+
 Jika berhasil, akan muncul:
 ```
 ✅ Database connected successfully
@@ -110,7 +116,7 @@ Jika berhasil, akan muncul:
       ================================================
 ```
 
-### 6. Test API
+### 7. Test API
 Buka browser dan akses: http://localhost:3000
 Seharusnya menampilkan welcome message API.
 
