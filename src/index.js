@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.js";
 import bookingRoutes from "./routes/bookings.js";
 import scheduleRoutes from "./routes/schedules.js";
 import { errorResponse } from "./utils/responses.js";
+import cors from "cors";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ const app = express();
 const localhost = "localhost";
 const PORT = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(morgan("dev"));
