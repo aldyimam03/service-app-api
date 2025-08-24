@@ -76,6 +76,28 @@ class Schedule {
       throw new Error("Database error (delete): " + error.message);
     }
   }
+
+  static async findOneByDate(schedule_date) {
+    try {
+      const [rows] = await db.execute(
+        `
+      SELECT 
+        id, 
+        DATE_FORMAT(schedule_date, '%Y-%m-%d') as schedule_date,
+        quota,
+        created_at, 
+        updated_at
+      FROM service_schedules
+      WHERE schedule_date = ?
+      LIMIT 1
+      `,
+        [String(schedule_date)]
+      );
+      return rows.length > 0 ? rows[0] : null;
+    } catch (error) {
+      throw new Error("Database error (findOneByDate): " + error.message);
+    }
+  }
 }
 
 export default Schedule;
