@@ -114,7 +114,6 @@ const startServer = async () => {
     process.exit(1);
   }
 };
-console.log("DB Name from env:", process.env.DB_NAME);
 
 startServer();
 
