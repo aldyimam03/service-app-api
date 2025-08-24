@@ -21,7 +21,7 @@ import { authenticateToken, isAdmin } from "../middleware/auth.js";
 const router = express.Router();
 
 router.post("/", validate(bookingSchema), validateBookingDate, createBooking);
-router.post("/check", validate(phoneSchema), getBookingByPhone);
+router.get("/:phone", validate(phoneSchema), getBookingByPhone);
 router.get("/", authenticateToken, isAdmin, getAllBookings);
 router.get("/statistics", authenticateToken, isAdmin, getBookingStatistics);
 router.get("/status/:status", authenticateToken, isAdmin, getBookingByStatus);

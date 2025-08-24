@@ -48,10 +48,10 @@ export const getBookingById = async (req, res) => {
 
 export const getBookingByPhone = async (req, res) => {
   try {
-    const { phone_no } = req.body;
-    if (!phone_no) return badRequestResponse(res, "Phone number required");
+    const { phone } = req.params;
+    if (!phone) return badRequestResponse(res, "Phone number required");
 
-    const bookings = await Booking.findByPhone(phone_no);
+    const bookings = await Booking.findByPhone(phone);
 
     if (bookings.length === 0) {
       return notFoundResponse(res, "No bookings found for this phone number");
