@@ -29,6 +29,15 @@ export const createSchedule = async (req, res) => {
       return badRequestResponse(res, "schedule_date and quota are required");
     }
 
+    const formatedDate = Schedule.normalizeDate
+      ? Schedule.normalizeDate(schedule_date)
+      : new Date(schedule_date).toISOString().split("T")[0];
+
+    const existingSchedule = await Schedule.findOneByDate(formatedDate);
+    if (existingSchedule) {
+      return conflictResponse(res, "Schedule already exists for this date");
+    }
+
     const scheduleId = await Schedule.create(req.body);
     const newSchedule = await Schedule.findById(scheduleId);
 

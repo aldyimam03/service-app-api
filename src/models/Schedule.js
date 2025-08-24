@@ -1,6 +1,10 @@
 import db from "../config/database.js";
 
 class Schedule {
+  static normalizeDate(dateInput) {
+    const date = new Date(dateInput);
+    return date.toISOString().split("T")[0];
+  }
   static async getAllSchedules() {
     try {
       const [rows] = await db.execute(`
@@ -43,9 +47,12 @@ class Schedule {
   static async create(scheduleData) {
     try {
       const { schedule_date, quota } = scheduleData;
+
+      const formatedDate = this.normalizeDate(schedule_date);
+
       const [result] = await db.execute(
         "INSERT INTO service_schedules (schedule_date, quota) VALUES (?, ?)",
-        [schedule_date, quota]
+        [formatedDate, quota]
       );
       return result.insertId;
     } catch (error) {
