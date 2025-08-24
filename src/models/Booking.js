@@ -183,21 +183,22 @@ class Booking {
     }
   }
 
-  static async findByStatus(statusName) {
+  static async findByStatus(statusId) {
     try {
       const [rows] = await db.execute(
         `
-        SELECT 
-          sb.id, sb.name, sb.phone_no, sb.vehicle_type, sb.license_plate, sb.vehicle_problem,
-          sb.service_time, DATE_FORMAT(ss.schedule_date, '%Y-%m-%d') AS schedule_date, st.name AS status,
-          sb.created_at, sb.updated_at
-        FROM service_bookings sb
-        JOIN service_schedules ss ON sb.service_schedule_id = ss.id
-        JOIN service_statuses st ON sb.service_status_id = st.id
-        WHERE st.name = ?
-        ORDER BY ss.schedule_date ASC, sb.service_time ASC
-      `,
-        [statusName]
+      SELECT 
+        sb.id, sb.name, sb.phone_no, sb.vehicle_type, sb.license_plate, sb.vehicle_problem,
+        sb.service_time, DATE_FORMAT(ss.schedule_date, '%Y-%m-%d') AS schedule_date, 
+        sb.service_status_id, st.name AS status_name,
+        sb.created_at, sb.updated_at
+      FROM service_bookings sb
+      JOIN service_schedules ss ON sb.service_schedule_id = ss.id
+      JOIN service_statuses st ON sb.service_status_id = st.id
+      WHERE sb.service_status_id = ?
+      ORDER BY ss.schedule_date ASC, sb.service_time ASC
+    `,
+        [statusId]
       );
       return rows;
     } catch (error) {

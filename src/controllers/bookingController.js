@@ -99,17 +99,33 @@ export const updateBookingStatus = async (req, res) => {
 
 export const getBookingByStatus = async (req, res) => {
   try {
-    const { status } = req.params;
+    const { statusId } = req.params;
 
-    const bookings = await Booking.findByStatus(status);
+    const statusIdNum = parseInt(statusId);
+    if (isNaN(statusIdNum) || statusId < 1 || statusId > 5) {
+      return badRequestResponse(res, "Invalid status ID");
+    }
+
+    const bookings = await Booking.findByStatus(statusId);
+
+    const statusNames = {
+      1: "menunggu konfirmasi",
+      2: "konfirmasi batal",
+      3: "konfirmasi datang",
+      4: "tidak datang",
+      5: "datang",
+    };
 
     if (bookings.length === 0) {
-      return notFoundResponse(res, `Bookings with status '${status}' not found`);
+      return notFoundResponse(
+        res,
+        `Bookings with status '${statusNames[statusIdNum]}' not found`
+      );
     }
 
     return successResponse(
       res,
-      `Bookings with status '${status}' retrieved successfully`,
+      `Bookings with status '${statusNames[statusIdNum]}' retrieved successfully`,
       {
         bookings,
         count: bookings.length,
