@@ -2,41 +2,11 @@ import db from "../config/database.js";
 
 class Booking {
   static async create(bookingData) {
-  const connection = await db.getConnection();
-  try {
-    await connection.beginTransaction();
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
 
-    const {
-      name,
-      phone_no,
-      vehicle_type,
-      license_plate,
-      vehicle_problem,
-      service_schedule_id,
-      service_time,
-      service_status_id = 1, 
-    } = bookingData;
-
-    const [schedules] = await connection.execute(
-      "SELECT id, quota FROM service_schedules WHERE id = ? FOR UPDATE",
-      [service_schedule_id]
-    );
-
-    if (schedules.length === 0) {
-      throw new Error("Schedule not found for given ID");
-    }
-
-    const schedule = schedules[0];
-
-    if (schedule.quota <= 0) {
-      throw new Error("No available quota for this schedule");
-    }
-
-    const [result] = await connection.execute(
-      `INSERT INTO service_bookings 
-        (name, phone_no, vehicle_type, license_plate, vehicle_problem, service_schedule_id, service_time, service_status_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
+      const {
         name,
         phone_no,
         vehicle_type,
@@ -44,26 +14,55 @@ class Booking {
         vehicle_problem,
         service_schedule_id,
         service_time,
-        service_status_id,
-      ]
-    );
+        service_status_id = 1,
+      } = bookingData;
 
-    await connection.execute(
-      "UPDATE service_schedules SET quota = quota - 1 WHERE id = ?",
-      [service_schedule_id]
-    );
+      const [schedules] = await connection.execute(
+        "SELECT id, quota FROM service_schedules WHERE id = ? FOR UPDATE",
+        [service_schedule_id]
+      );
 
-    await connection.commit();
+      if (schedules.length === 0) {
+        throw new Error("Schedule not found for given ID");
+      }
 
-    return result.insertId;
-  } catch (error) {
-    await connection.rollback();
-    throw new Error("Database error (create booking): " + error.message);
-  } finally {
-    connection.release();
+      const schedule = schedules[0];
+
+      if (schedule.quota <= 0) {
+        throw new Error("No available quota for this schedule");
+      }
+
+      const [result] = await connection.execute(
+        `INSERT INTO service_bookings 
+        (name, phone_no, vehicle_type, license_plate, vehicle_problem, service_schedule_id, service_time, service_status_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          name,
+          phone_no,
+          vehicle_type,
+          license_plate,
+          vehicle_problem,
+          service_schedule_id,
+          service_time,
+          service_status_id,
+        ]
+      );
+
+      await connection.execute(
+        "UPDATE service_schedules SET quota = quota - 1 WHERE id = ?",
+        [service_schedule_id]
+      );
+
+      await connection.commit();
+
+      return result.insertId;
+    } catch (error) {
+      await connection.rollback();
+      throw new Error("Database error (create booking): " + error.message);
+    } finally {
+      connection.release();
+    }
   }
-}
-
 
   static async getAll() {
     try {
@@ -127,63 +126,62 @@ class Booking {
   }
 
   static async updateStatus(id, newStatusId) {
-  const connection = await db.getConnection();
-  try {
-    await connection.beginTransaction();
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
 
-    const [bookings] = await connection.execute(
-      "SELECT id, service_schedule_id, service_status_id FROM service_bookings WHERE id = ?",
-      [id]
-    );
+      const [bookings] = await connection.execute(
+        "SELECT id, service_schedule_id, service_status_id FROM service_bookings WHERE id = ?",
+        [id]
+      );
 
-    if (bookings.length === 0) {
-      throw new Error("Booking not found");
-    }
+      if (bookings.length === 0) {
+        throw new Error("Booking not found");
+      }
 
-    const booking = bookings[0];
-    const oldStatusId = booking.service_status_id;
+      const booking = bookings[0];
+      const oldStatusId = booking.service_status_id;
 
-    if (oldStatusId === newStatusId) {
-      await connection.commit();
-      return true;
-    }
+      if (oldStatusId === newStatusId) {
+        await connection.commit();
+        return true;
+      }
 
-    await connection.execute(
-      "UPDATE service_bookings SET service_status_id = ? WHERE id = ?",
-      [newStatusId, id]
-    );
-
-    if (newStatusId === 2 && oldStatusId !== 2) {
       await connection.execute(
-        "UPDATE service_schedules SET quota = quota + 1 WHERE id = ?",
-        [booking.service_schedule_id]
-      );
-    }
-    else if (oldStatusId === 2 && newStatusId !== 2) {
-      const [schedules] = await connection.execute(
-        "SELECT quota FROM service_schedules WHERE id = ? FOR UPDATE",
-        [booking.service_schedule_id]
+        "UPDATE service_bookings SET service_status_id = ? WHERE id = ?",
+        [newStatusId, id]
       );
 
-      if (schedules.length > 0 && schedules[0].quota > 0) {
+      if (newStatusId === 2 && oldStatusId !== 2) {
         await connection.execute(
-          "UPDATE service_schedules SET quota = quota - 1 WHERE id = ?",
+          "UPDATE service_schedules SET quota = quota + 1 WHERE id = ?",
           [booking.service_schedule_id]
         );
-      } else {
-        throw new Error("Cannot booking, schedule is now full.");
-      }
-    }
+      } else if (oldStatusId === 2 && newStatusId !== 2) {
+        const [schedules] = await connection.execute(
+          "SELECT quota FROM service_schedules WHERE id = ? FOR UPDATE",
+          [booking.service_schedule_id]
+        );
 
-    await connection.commit();
-    return true;
-  } catch (error) {
-    await connection.rollback();
-    throw new Error("Database error (updateStatus): " + error.message);
-  } finally {
-    connection.release();
+        if (schedules.length > 0 && schedules[0].quota > 0) {
+          await connection.execute(
+            "UPDATE service_schedules SET quota = quota - 1 WHERE id = ?",
+            [booking.service_schedule_id]
+          );
+        } else {
+          throw new Error("Cannot booking, schedule is now full.");
+        }
+      }
+
+      await connection.commit();
+      return true;
+    } catch (error) {
+      await connection.rollback();
+      throw new Error("Database error (updateStatus): " + error.message);
+    } finally {
+      connection.release();
+    }
   }
-}
 
   static async findByStatus(statusName) {
     try {
