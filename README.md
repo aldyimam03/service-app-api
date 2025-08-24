@@ -128,7 +128,7 @@ Seharusnya menampilkan welcome message API.
 |--------|----------|-------------|
 | `POST` | `/api/auth/login` | Login dealer |
 | `POST` | `/api/bookings` | Buat pemesanan baru |
-| `GET` | `/api/bookings/check` | Cek pemesanan berdasarkan nomor telepon |
+| `GET` | `/api/bookings/:phone` | Cek pemesanan berdasarkan nomor telepon |
 
 ### 🔒 Protected Endpoints (Dealer Only - Butuh JWT Token)
 
@@ -151,7 +151,7 @@ Seharusnya menampilkan welcome message API.
 |--------|----------|-------------|
 | `GET` | `/api/bookings` | Dapatkan semua pemesanan |
 | `GET` | `/api/bookings/:id` | Dapatkan pemesanan berdasarkan ID |
-| `GET` | `/api/bookings/status/:status` | Dapatkan pemesanan berdasarkan status |
+| `GET` | `/api/bookings/status/:statusId` | Dapatkan pemesanan berdasarkan status |
 | `GET` | `/api/bookings/statistics` | Dapatkan statistik pemesanan |
 | `PUT` | `/api/bookings/:id/status` | Update status pemesanan |
 
